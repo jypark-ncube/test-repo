@@ -1,5 +1,5 @@
 {
-  "name": "ncubelab-image-assessment-demo",
+  "name": "alice-test-web-nodejs",
   "version": "0.1.0",
   "private": true,
   "description": "Small Node.js website for AWS image assessment testing.",

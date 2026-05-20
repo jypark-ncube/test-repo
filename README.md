@@ -23,8 +23,8 @@ Open `http://localhost:3000`.
 ## Build Docker Image
 
 ```bash
-docker build -t ncubelab-image-assessment-demo:latest .
-docker run --rm -p 3000:3000 ncubelab-image-assessment-demo:latest
+docker build -t alice-test-web-nodejs:latest .
+docker run --rm -p 3000:3000 alice-test-web-nodejs:latest
 ```
 
 ## Push To ECR
@@ -32,7 +32,7 @@ docker run --rm -p 3000:3000 ncubelab-image-assessment-demo:latest
 ```bash
 AWS_REGION=ap-northeast-2
 AWS_ACCOUNT_ID=729017845242
-ECR_REPOSITORY=alice/iar-test
+ECR_REPOSITORY=alice-test-web-nodejs
 
 aws ecr create-repository \
   --repository-name "$ECR_REPOSITORY" \
@@ -41,7 +41,7 @@ aws ecr create-repository \
 aws ecr get-login-password --region "$AWS_REGION" \
   | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
 
-docker tag ncubelab-image-assessment-demo:latest \
+docker tag alice-test-web-nodejs:latest \
   "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest"
 
 docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest"
@@ -52,7 +52,7 @@ docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:l
 The workflow at `.github/workflows/build-and-push-ecr.yml` builds this Docker image and pushes it to:
 
 ```text
-729017845242.dkr.ecr.ap-northeast-2.amazonaws.com/alice/iar-test
+729017845242.dkr.ecr.ap-northeast-2.amazonaws.com/alice-test-web-nodejs
 ```
 
 It runs on pushes to `main` and can also be started manually with `workflow_dispatch`.
@@ -69,3 +69,11 @@ or:
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
 ```
+
+If your IAM role uses a narrow custom ECR policy, allow this repository ARN:
+
+```text
+arn:aws:ecr:ap-northeast-2:729017845242:repository/alice-test-web-nodejs
+```
+
+The workflow also calls `ecr:CreateRepository` so it can create the repository if it does not already exist.
