@@ -10,7 +10,7 @@ env:
   AWS_REGION: ap-northeast-2
   ECR_REGISTRY: 729017845242.dkr.ecr.ap-northeast-2.amazonaws.com
   ECR_REPOSITORY: alice/iar-test
-  IMAGE_TAG: alice-test-web-nodejs
+  IMAGE_TAG: alice-test-web-nodejs-v${{ github.run_number }}.${{ github.run_attempt }}
   AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
 
 permissions:
@@ -51,5 +51,6 @@ jobs:
           push: true
           tags: |
             ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
-            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+
+      - name: Print pushed image
+        run: echo "${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"

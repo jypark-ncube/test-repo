@@ -33,7 +33,7 @@ docker run --rm -p 3000:3000 alice-test-web-nodejs:latest
 AWS_REGION=ap-northeast-2
 AWS_ACCOUNT_ID=729017845242
 ECR_REPOSITORY=alice/iar-test
-IMAGE_TAG=alice-test-web-nodejs
+IMAGE_TAG=alice-test-web-nodejs-v$(date +%Y%m%d%H%M%S)
 
 aws ecr get-login-password --region "$AWS_REGION" \
   | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
@@ -49,10 +49,11 @@ docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$
 The workflow at `.github/workflows/build-and-push-ecr.yml` builds this Docker image and pushes it to:
 
 ```text
-729017845242.dkr.ecr.ap-northeast-2.amazonaws.com/alice/iar-test:alice-test-web-nodejs
+729017845242.dkr.ecr.ap-northeast-2.amazonaws.com/alice/iar-test:alice-test-web-nodejs-v<run_number>.<run_attempt>
 ```
 
 It runs on pushes to `main` and can also be started manually with `workflow_dispatch`.
+The workflow uses a fresh versioned tag on every run so immutable ECR tags are not overwritten.
 
 Use one of these GitHub Secrets authentication setups:
 
