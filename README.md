@@ -54,8 +54,9 @@ The workflow at `.github/workflows/build-and-push-ecr.yml` builds this Docker im
 
 It runs on pushes to `main` and can also be started manually with `workflow_dispatch`.
 The workflow uses a fresh versioned tag on every run so immutable ECR tags are not overwritten.
+After pushing the image, it runs `crowdstrike/fcs-action` against the same ECR image tag and uploads the scan result as a GitHub Actions artifact.
 
-Use one of these GitHub Secrets authentication setups:
+Use one of these AWS authentication setups:
 
 ```text
 AWS_ROLE_TO_ASSUME
@@ -72,4 +73,22 @@ If your IAM role uses a narrow custom ECR policy, allow this repository ARN:
 
 ```text
 arn:aws:ecr:ap-northeast-2:729017845242:repository/alice/iar-test
+```
+
+For CrowdStrike FCS image scanning, add these GitHub repository settings:
+
+```text
+Variable: FALCON_CLIENT_ID
+Variable: FALCON_REGION
+Secret: FALCON_CLIENT_SECRET
+```
+
+`FALCON_REGION` defaults to `us-1` in the workflow if the variable is not set. Common values are `us-1`, `us-2`, `eu-1`, `us-gov-1`, and `us-gov-2`.
+
+The CrowdStrike API client needs these scopes:
+
+```text
+Cloud Security Tools Download: READ
+Falcon Container CLI: READ and WRITE
+Falcon Container Image: READ and WRITE
 ```

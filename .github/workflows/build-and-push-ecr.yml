@@ -45,6 +45,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push image
+        id: build-and-push
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -54,3 +55,31 @@ jobs:
 
       - name: Print pushed image
         run: echo "${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+
+      - name: Scan pushed image with CrowdStrike FCS
+        id: fcs-image-scan
+        uses: crowdstrike/fcs-action@v4.0.1
+        with:
+          falcon_client_id: ${{ vars.FALCON_CLIENT_ID }}
+          falcon_region: ${{ vars.FALCON_REGION || 'us-1' }}
+          scan_type: image
+          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          platform: linux/amd64
+          report_formats: json
+          output_path: ./fcs-image-scan-results.json
+          upload_results: true
+        env:
+          FALCON_CLIENT_SECRET: ${{ secrets.FALCON_CLIENT_SECRET }}
+
+      - name: Print FCS scan exit code
+        if: always()
+        run: |
+          echo "FCS scan exit code: ${{ steps.fcs-image-scan.outputs.exit-code }}"
+
+      - name: Upload FCS scan report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fcs-image-scan-results
+          path: ./fcs-image-scan-results.json
+          if-no-files-found: warn
